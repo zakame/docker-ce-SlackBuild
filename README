@@ -8,7 +8,7 @@ Here's how to install the static release of Docker CE on Slackware.
 
 First, go to the Debian Packages page for qemu-efi:
 
-https://download.docker.com/linux/static/x86_64/
+https://download.docker.com/linux/static/stable/x86_64/
 
 Download the .tgz package.
 
@@ -30,7 +30,7 @@ You'll find the output package in the /tmp directory.
 Then, install the package (again as root):
 
 cd /tmp
-upgradepkg --install-new docker-ce-17.12.0-x86_64-1zakame
+upgradepkg --install-new docker-ce-17.12.0-x86_64-1zakame.txz
 
 
 Enjoy!  :-)
