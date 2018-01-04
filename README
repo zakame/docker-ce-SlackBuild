@@ -6,7 +6,7 @@ docker-ce (Docker Community Edition)
 Here's how to install the static release of Docker CE on Slackware.
 
 
-First, go to the Debian Packages page for qemu-efi:
+First, go to the Debian Packages page for docker-ce:
 
 https://download.docker.com/linux/static/stable/x86_64/
 
