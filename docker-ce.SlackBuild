@@ -1,0 +1,124 @@
+#!/bin/sh
+
+# Copyright 2018 Zak B. Elep, Makati, Metro Manila, Philippines
+# All rights reserved.
+#
+# Redistribution and use of this script, with or without modification, is
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of this script must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ''AS IS'' AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+PKGNAM=docker-ce
+RELEASE=${RELEASE:-17.12.0}
+ARCH="x86_64"
+BUILD=${BUILD:-1zakame}
+
+
+if [ ! $UID = 0 ]; then
+  cat << EOF
+
+This script must be run as root.
+
+EOF
+  exit 1
+fi
+
+if ! /bin/ls docker-${RELEASE}-ce.tgz 1> /dev/null 2> /dev/null ; then
+  cat << EOF
+
+This is a script to repackage a statically-linked Docker CE release
+for Slackware.  Run this script in the same directory as this
+binary package:
+
+  docker-${RELEASE}-ce.tgz
+  
+This will create a Slackware .txz package.  Install it with installpkg
+or use upgradepkg to upgrade from a previous version.
+
+EOF
+  exit 1
+fi
+
+CWD=$(pwd)
+TMP=${TMP:-/tmp}
+PKG=$TMP/package-$PKGNAM
+OUTPUT=${OUTPUT:-/tmp}
+
+rm -rf $PKG
+mkdir -p $TMP $PKG $OUTPUT
+cd $PKG
+tar xf $CWD/docker-${RELEASE}-ce.tgz || exit 1
+chown -R root:root .
+chmod -R u+w,go+r-w,a-s .
+
+# Make sure top-level perms are correct:
+chmod 0755 .
+
+# Move the binaries into place:
+install -d -m 755 $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker-containerd $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker-containerd-ctr $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker-containerd-shim $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker-init $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker-proxy $PKG/usr/bin/
+install -p -m 755 $PKG/docker/docker-runc $PKG/usr/bin/
+install -p -m 755 $PKG/docker/dockerd $PKG/usr/bin/
+rm -fr $PKG/docker/
+
+# Install configuration:
+install -D -m644 $CWD/config/docker.default $PKG/etc/default/docker.new
+install -D -m644 $CWD/config/docker.logrotate $PKG/etc/logrotate.d/docker.new
+install -D -m755 $CWD/config/rc.docker $PKG/etc/rc.d/rc.docker.new
+
+mkdir -p $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+cat <<EOINS >> $PKG/install/doinst.sh
+# Handle the incoming configuration files:
+config() {
+  for infile in \$1; do
+    NEW="\$infile"
+    OLD="\`dirname \$NEW\`/\`basename \$NEW .new\`"
+    # If there's no config file by that name, mv it over:
+    if [ ! -r \$OLD ]; then
+      mv \$NEW \$OLD
+    elif [ "\`cat \$OLD | md5sum\`" = "\`cat \$NEW | md5sum\`" ]; then
+      # toss the redundant copy
+      rm \$NEW
+    fi
+    # Otherwise, we leave the .new copy for the admin to consider...
+  done
+}
+
+preserve_perms() {
+  NEW="\$1"
+  OLD="\`dirname \$NEW\`/\`basename \$NEW .new\`"
+  if [ ! -e \$OLD ]; then
+    cp -a \$OLD \${NEW}.incoming
+    cat \$NEW > \${NEW}.incoming
+    mv \${NEW}.incoming \${NEW}
+  fi
+  config \$NEW
+}
+
+config etc/default/docker.new
+config etc/logrotate.d/docker.new
+preserve_perms etc/rc.d/rc.docker.new
+EOINS
+
+cd $PKG
+/sbin/makepkg -l y -c n $OUTPUT/$PKGNAM-$RELEASE-$ARCH-$BUILD.txz
+

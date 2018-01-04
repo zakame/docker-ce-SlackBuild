@@ -1,0 +1,37 @@
+docker-ce (Docker Community Edition)
+--------------------------------------------------------
+
+(Adapted from SlackBuilds.org and Vincent Batts' original scripts.)
+
+Here's how to install the static release of Docker CE on Slackware.
+
+
+First, go to the Debian Packages page for qemu-efi:
+
+https://download.docker.com/linux/static/x86_64/
+
+Download the .tgz package.
+
+
+Then, with the .tgz package in the same directory as the
+docker-ce.SlackBuild script, run the script as root to convert the .deb
+to a Slackware .txz:
+
+./docker-ce.SlackBuild
+
+This will produce a Slackware compatible .txz package.  The exact
+version number in the package filename will depend on the version
+of qemu-efi found in the .deb package, but it will be something
+like:  docker-ce-17.12.0-x86_64-1zakame
+
+You'll find the output package in the /tmp directory.
+
+
+Then, install the package (again as root):
+
+cd /tmp
+upgradepkg --install-new docker-ce-17.12.0-x86_64-1zakame
+
+
+Enjoy!  :-)
+
