@@ -24,7 +24,7 @@
 PKGNAM=docker-ce
 RELEASE=${RELEASE:-18.03.1}
 ARCH="x86_64"
-BUILD=${BUILD:-1zakame}
+BUILD=${BUILD:-2zakame}
 
 
 if [ ! $UID = 0 ]; then
