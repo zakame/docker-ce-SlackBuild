@@ -12,6 +12,18 @@ https://download.docker.com/linux/static/stable/x86_64/
 
 Download the .tgz package.
 
+Then, ensure that the 'docker' group is present in your system, by
+running the following line as root:
+
+groupadd -r -g 281 docker
+
+Add your selected user accounts to the 'docker' group for these accounts
+to use Docker without requiring root privileges by running:
+
+usermod -a -G docker <your_username>
+
+(Note that currently-logged-in user accounts will need to relog.)
+
 Then, with the .tgz package in the same directory as the
 docker-ce.SlackBuild script, run the script as root to convert the .tgz
 to a Slackware .txz:
