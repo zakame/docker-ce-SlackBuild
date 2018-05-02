@@ -52,6 +52,19 @@ EOF
   exit 1
 fi
 
+DOCKER_GID=${DOCKER_GID:-281}
+
+if ! /bin/grep ^docker: /etc/group 1> /dev/null 2> /dev/null ; then
+    cat << EOF
+
+You must have a docker group to run this script:
+
+  # groupadd -r -g $DOCKER_GID docker
+
+EOF
+  exit 1
+fi
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
