@@ -27,7 +27,7 @@ ARCH="x86_64"
 BUILD=${BUILD:-1zakame}
 
 
-if [ ! $UID = 0 ]; then
+if [ ! "$(id -u)" = 0 ]; then
   cat << EOF
 
 This script must be run as root.
@@ -36,7 +36,7 @@ EOF
   exit 1
 fi
 
-if ! /bin/ls docker-${RELEASE}.tgz 1> /dev/null 2> /dev/null ; then
+if ! /bin/ls "docker-${RELEASE}.tgz" 1> /dev/null 2> /dev/null ; then
   cat << EOF
 
 This is a script to repackage a statically-linked Docker CE release
@@ -70,10 +70,10 @@ TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 OUTPUT=${OUTPUT:-/tmp}
 
-rm -rf $PKG
-mkdir -p $TMP $PKG $OUTPUT
-cd $PKG
-tar xf $CWD/docker-${RELEASE}.tgz || exit 1
+rm -rf "$PKG"
+mkdir -p "$TMP" "$PKG" "$OUTPUT"
+cd "$PKG" || exit 1
+tar xf "$CWD/docker-${RELEASE}.tgz" || exit 1
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
@@ -81,25 +81,25 @@ chmod -R u+w,go+r-w,a-s .
 chmod 0755 .
 
 # Move the binaries into place:
-install -d -m 755 $PKG/usr/bin/
-install -p -m 755 $PKG/docker/docker $PKG/usr/bin/
-install -p -m 755 $PKG/docker/containerd $PKG/usr/bin/
-install -p -m 755 $PKG/docker/ctr $PKG/usr/bin/
-install -p -m 755 $PKG/docker/containerd-shim $PKG/usr/bin/
-install -p -m 755 $PKG/docker/docker-init $PKG/usr/bin/
-install -p -m 755 $PKG/docker/docker-proxy $PKG/usr/bin/
-install -p -m 755 $PKG/docker/runc $PKG/usr/bin/
-install -p -m 755 $PKG/docker/dockerd $PKG/usr/bin/
-rm -fr $PKG/docker/
+install -d -m 755 "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/docker" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/containerd" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/ctr" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/containerd-shim" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/docker-init" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/docker-proxy" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/runc" "$PKG/usr/bin/"
+install -p -m 755 "$PKG/docker/dockerd" "$PKG/usr/bin/"
+rm -fr "$PKG/docker/"
 
 # Install configuration:
-install -D -m644 $CWD/config/docker.default $PKG/etc/default/docker.new
-install -D -m644 $CWD/config/docker.logrotate $PKG/etc/logrotate.d/docker.new
-install -D -m755 $CWD/config/rc.docker $PKG/etc/rc.d/rc.docker.new
+install -D -m644 "$CWD/config/docker.default" "$PKG/etc/default/docker.new"
+install -D -m644 "$CWD/config/docker.logrotate" "$PKG/etc/logrotate.d/docker.new"
+install -D -m755 "$CWD/config/rc.docker" "$PKG/etc/rc.d/rc.docker.new"
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-cat <<EOINS >> $PKG/install/doinst.sh
+mkdir -p "$PKG/install"
+cat "$CWD/slack-desc" > "$PKG/install/slack-desc"
+cat <<EOINS >> "$PKG/install/doinst.sh"
 # Handle the incoming configuration files:
 config() {
   for infile in \$1; do
@@ -128,6 +128,6 @@ config etc/default/docker.new
 config etc/logrotate.d/docker.new
 EOINS
 
-cd $PKG
-/sbin/makepkg -l y -c n $OUTPUT/$PKGNAM-$RELEASE-$ARCH-$BUILD.txz
+cd "$PKG" || exit 1
+/sbin/makepkg -l y -c n "$OUTPUT/$PKGNAM-$RELEASE-$ARCH-$BUILD.txz"
 
