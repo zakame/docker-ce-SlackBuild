@@ -97,6 +97,11 @@ install -D -m644 "$CWD/config/docker.default" "$PKG/etc/default/docker.new"
 install -D -m644 "$CWD/config/docker.logrotate" "$PKG/etc/logrotate.d/docker.new"
 install -D -m755 "$CWD/config/rc.docker" "$PKG/etc/rc.d/rc.docker.new"
 
+# Track containerd managed /opt
+install -d -m 711 "$PKG/opt/containerd/"
+install -d -m 711 "$PKG/opt/containerd/bin/"
+install -d -m 711 "$PKG/opt/containerd/lib/"
+
 mkdir -p "$PKG/install"
 cat "$CWD/slack-desc" > "$PKG/install/slack-desc"
 cat <<EOINS >> "$PKG/install/doinst.sh"
