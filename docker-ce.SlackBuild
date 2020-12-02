@@ -22,7 +22,7 @@
 
 
 PKGNAM=docker-ce
-RELEASE=${RELEASE:-19.03.13}
+RELEASE=${RELEASE:-19.03.14}
 ARCH="x86_64"
 BUILD=${BUILD:-1zakame}
 
