@@ -14,6 +14,6 @@ docker-ce: container that a developer builds and tests on a laptop can run at
 docker-ce: scale, in production, on VMs, bare metal, OpenStack clusters, public
 docker-ce: clouds and more.
 docker-ce:
-docker-ce: Homepage: https://www.docker.com/community-edition
+docker-ce: Homepage: https://www.docker.com/products/container-runtime
 docker-ce:
 docker-ce:
